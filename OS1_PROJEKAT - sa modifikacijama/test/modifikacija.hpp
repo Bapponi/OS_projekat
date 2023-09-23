@@ -1,0 +1,10 @@
+//
+// Created by os on 9/3/23.
+//
+
+#ifndef NOVI_THE_OS1_PROJEKAT_MODIFIKACIJA_HPP
+#define NOVI_THE_OS1_PROJEKAT_MODIFIKACIJA_HPP
+
+void modifikacija();
+
+#endif //NOVI_THE_OS1_PROJEKAT_MODIFIKACIJA_HPP

@@ -1,0 +1,10 @@
+//
+// Created by os on 9/21/23.
+//
+
+#ifndef NOVI_THE_OS1_PROJEKAT_MAXNITI_HPP
+#define NOVI_THE_OS1_PROJEKAT_MAXNITI_HPP
+
+void maxNiti();
+
+#endif //NOVI_THE_OS1_PROJEKAT_MAXNITI_HPP

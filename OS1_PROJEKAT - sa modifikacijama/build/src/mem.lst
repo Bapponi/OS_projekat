@@ -1,0 +1,1591 @@
+GAS LISTING /tmp/ccpyAonF.s 			page 1
+
+
+   1              		.file	"mem.cpp"
+   2              		.option pic
+   3              		.option norelax
+   4              		.text
+   5              	.Ltext0:
+   6              		.align	2
+   7              		.globl	_ZN3MEM8memAllocEm
+   9              	_ZN3MEM8memAllocEm:
+  10              	.LFB4:
+  11              		.file 1 "src/mem.cpp"
+   1:src/mem.cpp   **** #include "../h/mem.h"
+   2:src/mem.cpp   **** 
+   3:src/mem.cpp   **** MEM::FullSpace* MEM::fullHead = nullptr;
+   4:src/mem.cpp   **** MEM::FreeSpace* MEM::freeHead = nullptr;
+   5:src/mem.cpp   **** 
+   6:src/mem.cpp   **** void MEM::init(){
+   7:src/mem.cpp   ****     freeHead = (FreeSpace*)HEAP_START_ADDR;
+   8:src/mem.cpp   **** 
+   9:src/mem.cpp   ****     freeHead->size = (size_t)HEAP_END_ADDR - (size_t)HEAP_START_ADDR;
+  10:src/mem.cpp   ****     freeHead->prev = nullptr;
+  11:src/mem.cpp   ****     freeHead->next = nullptr;
+  12:src/mem.cpp   **** 
+  13:src/mem.cpp   ****     MEM::memAlloc((sizeof(MEM) + MEM_BLOCK_SIZE - 1) / MEM_BLOCK_SIZE);
+  14:src/mem.cpp   **** }
+  15:src/mem.cpp   **** 
+  16:src/mem.cpp   **** void *MEM::memAlloc(size_t size) {
+  12              		.loc 1 16 34
+  13              		.cfi_startproc
+  14              	.LVL0:
+  15 0000 130101FF 		addi	sp,sp,-16
+  16              		.cfi_def_cfa_offset 16
+  17 0004 23348100 		sd	s0,8(sp)
+  18              		.cfi_offset 8, -8
+  19 0008 13040101 		addi	s0,sp,16
+  20              		.cfi_def_cfa 8, 0
+  17:src/mem.cpp   **** 
+  18:src/mem.cpp   ****     if (size <= 0)
+  21              		.loc 1 18 5
+  22 000c 63040512 		beqz	a0,.L18
+  19:src/mem.cpp   ****         return nullptr;
+  20:src/mem.cpp   **** 
+  21:src/mem.cpp   ****     size_t neededSize = size * MEM_BLOCK_SIZE;
+  23              		.loc 1 21 5
+  24              		.loc 1 21 12 is_stmt 0
+  25 0010 13176500 		slli	a4,a0,6
+  26              	.LVL1:
+  22:src/mem.cpp   ****     FreeSpace* freeSpace = freeHead;
+  27              		.loc 1 22 5 is_stmt 1
+  28              		.loc 1 22 16 is_stmt 0
+  29 0014 17050000 		ld	a0,.LANCHOR0
+  29      03350500 
+  30              	.LVL2:
+  31              	.L4:
+  23:src/mem.cpp   **** 
+  24:src/mem.cpp   ****     while(freeSpace != nullptr){
+  32              		.loc 1 24 5 is_stmt 1
+  33              		.loc 1 24 21
+GAS LISTING /tmp/ccpyAonF.s 			page 2
+
+
+  34 001c 6308050E 		beqz	a0,.L1
+  35              	.LBB2:
+  25:src/mem.cpp   ****         if(freeSpace->size < neededSize){
+  36              		.loc 1 25 9
+  37              	.LBB3:
+  38              		.loc 1 25 23 is_stmt 0
+  39 0020 83370500 		ld	a5,0(a0)
+  40              		.loc 1 25 9
+  41 0024 63E8E704 		bltu	a5,a4,.L22
+  42              	.LBE3:
+  43              	.LBE2:
+  26:src/mem.cpp   ****             freeSpace = freeSpace->next;
+  27:src/mem.cpp   ****             continue;
+  28:src/mem.cpp   ****         }
+  29:src/mem.cpp   ****         //ako ostane dovoljno mali prostor koji se nikada ne bi koristio leftover
+  30:src/mem.cpp   ****         else if(freeSpace->size  < (neededSize + sizeof(FreeSpace))){
+  44              		.loc 1 30 14 is_stmt 1
+  45              	.LBB10:
+  46              	.LBB7:
+  47              	.LBB4:
+  48              		.loc 1 30 48 is_stmt 0
+  49 0028 93068701 		addi	a3,a4,24
+  50              		.loc 1 30 14
+  51 002c 63F0D706 		bgeu	a5,a3,.L5
+  31:src/mem.cpp   **** 
+  32:src/mem.cpp   ****             if(freeSpace->prev)
+  52              		.loc 1 32 13 is_stmt 1
+  53              		.loc 1 32 27 is_stmt 0
+  54 0030 83378500 		ld	a5,8(a0)
+  55              		.loc 1 32 13
+  56 0034 63840704 		beqz	a5,.L6
+  33:src/mem.cpp   ****                 freeSpace->prev->next = freeSpace->next;
+  57              		.loc 1 33 17 is_stmt 1
+  58              		.loc 1 33 52 is_stmt 0
+  59 0038 83360501 		ld	a3,16(a0)
+  60              		.loc 1 33 39
+  61 003c 23B8D700 		sd	a3,16(a5)
+  62              	.L7:
+  34:src/mem.cpp   ****             else
+  35:src/mem.cpp   ****                 freeHead = freeSpace->next;
+  36:src/mem.cpp   **** 
+  37:src/mem.cpp   ****             if(freeSpace->next)
+  63              		.loc 1 37 13 is_stmt 1
+  64              		.loc 1 37 27 is_stmt 0
+  65 0040 83370501 		ld	a5,16(a0)
+  66              		.loc 1 37 13
+  67 0044 63860700 		beqz	a5,.L8
+  38:src/mem.cpp   ****                 freeSpace->next->prev = freeSpace->prev;
+  68              		.loc 1 38 17 is_stmt 1
+  69              		.loc 1 38 52 is_stmt 0
+  70 0048 83368500 		ld	a3,8(a0)
+  71              		.loc 1 38 39
+  72 004c 23B4D700 		sd	a3,8(a5)
+  73              	.L8:
+  74              	.LBE4:
+  75              	.LBE7:
+  39:src/mem.cpp   ****         }
+GAS LISTING /tmp/ccpyAonF.s 			page 3
+
+
+  40:src/mem.cpp   ****         else{
+  41:src/mem.cpp   **** 
+  42:src/mem.cpp   ****             //ostatak koji nije iskoriscen prevezati u slobodni segment
+  43:src/mem.cpp   ****             auto* leftover = (FreeSpace*)(neededSize + (char*)freeSpace);
+  44:src/mem.cpp   ****             leftover->prev = freeSpace->prev;
+  45:src/mem.cpp   ****             leftover->next = freeSpace->next;
+  46:src/mem.cpp   ****             leftover->size = freeSpace->size - neededSize;
+  47:src/mem.cpp   **** 
+  48:src/mem.cpp   ****             //skidanje referenci sa novozauzete memorije
+  49:src/mem.cpp   ****             if(freeSpace->prev)
+  50:src/mem.cpp   ****                 freeSpace->prev->next = leftover;
+  51:src/mem.cpp   ****             else
+  52:src/mem.cpp   ****                 freeHead = leftover;
+  53:src/mem.cpp   **** 
+  54:src/mem.cpp   ****             if(freeSpace->next)
+  55:src/mem.cpp   ****                 freeSpace->next->prev = leftover;
+  56:src/mem.cpp   ****         }
+  57:src/mem.cpp   **** 
+  58:src/mem.cpp   ****         //dolazak u punoj memoriji do elementa nakon kog treba da se uveze novi elem
+  59:src/mem.cpp   ****         FullSpace* fullSpace = nullptr;
+  76              		.loc 1 59 9 is_stmt 1
+  77              	.LVL3:
+  60:src/mem.cpp   ****         if (fullHead && (char*)freeSpace >= (char*)fullHead) {
+  78              		.loc 1 60 9
+  79              		.loc 1 60 52 is_stmt 0
+  80 0050 97070000 		ld	a5,.LANCHOR0+8
+  80      83B70700 
+  81              		.loc 1 60 9
+  82 0058 638E0706 		beqz	a5,.L19
+  83              		.loc 1 60 22 discriminator 1
+  84 005c 6360F508 		bgtu	a5,a0,.L20
+  85              	.LVL4:
+  86              	.L12:
+  61:src/mem.cpp   **** 
+  62:src/mem.cpp   ****             fullSpace = fullHead;
+  63:src/mem.cpp   ****             while(fullSpace->next != nullptr && (char *)freeSpace > (char *)(fullSpace->next)){
+  87              		.loc 1 63 13 is_stmt 1
+  88              		.loc 1 63 46
+  89 0060 93860700 		mv	a3,a5
+  90              		.loc 1 63 30 is_stmt 0
+  91 0064 83B70701 		ld	a5,16(a5)
+  92              	.LVL5:
+  93              		.loc 1 63 46
+  94 0068 638C0706 		beqz	a5,.L11
+  95              		.loc 1 63 46 discriminator 1
+  96 006c E3EAA7FE 		bltu	a5,a0,.L12
+  97 0070 6F000007 		j	.L11
+  98              	.LVL6:
+  99              	.L22:
+ 100              	.LBB8:
+  26:src/mem.cpp   ****             continue;
+ 101              		.loc 1 26 13 is_stmt 1 discriminator 1
+  26:src/mem.cpp   ****             continue;
+ 102              		.loc 1 26 23 is_stmt 0 discriminator 1
+ 103 0074 03350501 		ld	a0,16(a0)
+ 104              	.LVL7:
+  27:src/mem.cpp   ****         }
+GAS LISTING /tmp/ccpyAonF.s 			page 4
+
+
+ 105              		.loc 1 27 13 is_stmt 1 discriminator 1
+ 106              	.LBE8:
+ 107              	.LBE10:
+  24:src/mem.cpp   ****         if(freeSpace->size < neededSize){
+ 108              		.loc 1 24 5 is_stmt 0 discriminator 1
+ 109 0078 6FF05FFA 		j	.L4
+ 110              	.L6:
+ 111              	.LBB11:
+ 112              	.LBB9:
+ 113              	.LBB6:
+  35:src/mem.cpp   **** 
+ 114              		.loc 1 35 17 is_stmt 1
+  35:src/mem.cpp   **** 
+ 115              		.loc 1 35 39 is_stmt 0
+ 116 007c 83370501 		ld	a5,16(a0)
+  35:src/mem.cpp   **** 
+ 117              		.loc 1 35 26
+ 118 0080 97060000 		sd	a5,.LANCHOR0,a3
+ 118      23B0F600 
+ 119 0088 6FF09FFB 		j	.L7
+ 120              	.L5:
+ 121              	.LBB5:
+  43:src/mem.cpp   ****             leftover->prev = freeSpace->prev;
+ 122              		.loc 1 43 13 is_stmt 1
+  43:src/mem.cpp   ****             leftover->prev = freeSpace->prev;
+ 123              		.loc 1 43 19 is_stmt 0
+ 124 008c B307E500 		add	a5,a0,a4
+ 125              	.LVL8:
+  44:src/mem.cpp   ****             leftover->next = freeSpace->next;
+ 126              		.loc 1 44 13 is_stmt 1
+  44:src/mem.cpp   ****             leftover->next = freeSpace->next;
+ 127              		.loc 1 44 41 is_stmt 0
+ 128 0090 83368500 		ld	a3,8(a0)
+  44:src/mem.cpp   ****             leftover->next = freeSpace->next;
+ 129              		.loc 1 44 28
+ 130 0094 23B4D700 		sd	a3,8(a5)
+  45:src/mem.cpp   ****             leftover->size = freeSpace->size - neededSize;
+ 131              		.loc 1 45 13 is_stmt 1
+  45:src/mem.cpp   ****             leftover->size = freeSpace->size - neededSize;
+ 132              		.loc 1 45 41 is_stmt 0
+ 133 0098 83360501 		ld	a3,16(a0)
+  45:src/mem.cpp   ****             leftover->size = freeSpace->size - neededSize;
+ 134              		.loc 1 45 28
+ 135 009c 23B8D700 		sd	a3,16(a5)
+  46:src/mem.cpp   **** 
+ 136              		.loc 1 46 13 is_stmt 1
+  46:src/mem.cpp   **** 
+ 137              		.loc 1 46 41 is_stmt 0
+ 138 00a0 83360500 		ld	a3,0(a0)
+  46:src/mem.cpp   **** 
+ 139              		.loc 1 46 46
+ 140 00a4 B386E640 		sub	a3,a3,a4
+  46:src/mem.cpp   **** 
+ 141              		.loc 1 46 28
+ 142 00a8 23B0D700 		sd	a3,0(a5)
+  49:src/mem.cpp   ****                 freeSpace->prev->next = leftover;
+ 143              		.loc 1 49 13 is_stmt 1
+GAS LISTING /tmp/ccpyAonF.s 			page 5
+
+
+  49:src/mem.cpp   ****                 freeSpace->prev->next = leftover;
+ 144              		.loc 1 49 27 is_stmt 0
+ 145 00ac 83368500 		ld	a3,8(a0)
+  49:src/mem.cpp   ****                 freeSpace->prev->next = leftover;
+ 146              		.loc 1 49 13
+ 147 00b0 638C0600 		beqz	a3,.L9
+  50:src/mem.cpp   ****             else
+ 148              		.loc 1 50 17 is_stmt 1
+  50:src/mem.cpp   ****             else
+ 149              		.loc 1 50 39 is_stmt 0
+ 150 00b4 23B8F600 		sd	a5,16(a3)
+ 151              	.L10:
+  54:src/mem.cpp   ****                 freeSpace->next->prev = leftover;
+ 152              		.loc 1 54 13 is_stmt 1
+  54:src/mem.cpp   ****                 freeSpace->next->prev = leftover;
+ 153              		.loc 1 54 27 is_stmt 0
+ 154 00b8 83360501 		ld	a3,16(a0)
+  54:src/mem.cpp   ****                 freeSpace->next->prev = leftover;
+ 155              		.loc 1 54 13
+ 156 00bc E38A06F8 		beqz	a3,.L8
+  55:src/mem.cpp   ****         }
+ 157              		.loc 1 55 17 is_stmt 1
+  55:src/mem.cpp   ****         }
+ 158              		.loc 1 55 39 is_stmt 0
+ 159 00c0 23B4F600 		sd	a5,8(a3)
+ 160 00c4 6FF0DFF8 		j	.L8
+ 161              	.L9:
+  52:src/mem.cpp   **** 
+ 162              		.loc 1 52 17 is_stmt 1
+  52:src/mem.cpp   **** 
+ 163              		.loc 1 52 26 is_stmt 0
+ 164 00c8 97060000 		sd	a5,.LANCHOR0,a3
+ 164      23B0F600 
+ 165 00d0 6FF09FFE 		j	.L10
+ 166              	.LVL9:
+ 167              	.L19:
+ 168              	.LBE5:
+ 169              	.LBE6:
+ 170              	.LBE9:
+  59:src/mem.cpp   ****         if (fullHead && (char*)freeSpace >= (char*)fullHead) {
+ 171              		.loc 1 59 20
+ 172 00d4 93860700 		mv	a3,a5
+ 173 00d8 6F008000 		j	.L11
+ 174              	.L20:
+ 175 00dc 93060000 		li	a3,0
+ 176              	.LVL10:
+ 177              	.L11:
+  64:src/mem.cpp   ****                 fullSpace = fullSpace->next;
+  65:src/mem.cpp   ****             }
+  66:src/mem.cpp   ****         }
+  67:src/mem.cpp   **** 
+  68:src/mem.cpp   ****         //uvezivanje novog elementa
+  69:src/mem.cpp   ****         auto* newFull = (FullSpace*)freeSpace;
+ 178              		.loc 1 69 9 is_stmt 1
+  70:src/mem.cpp   ****         newFull->size = neededSize;
+ 179              		.loc 1 70 9
+ 180              		.loc 1 70 23 is_stmt 0
+GAS LISTING /tmp/ccpyAonF.s 			page 6
+
+
+ 181 00e0 2330E500 		sd	a4,0(a0)
+  71:src/mem.cpp   ****         newFull->prev = fullSpace;
+ 182              		.loc 1 71 9 is_stmt 1
+ 183              		.loc 1 71 23 is_stmt 0
+ 184 00e4 2334D500 		sd	a3,8(a0)
+  72:src/mem.cpp   **** 
+  73:src/mem.cpp   ****         if (fullSpace)
+ 185              		.loc 1 73 9 is_stmt 1
+ 186 00e8 63880602 		beqz	a3,.L13
+  74:src/mem.cpp   ****             newFull->next = fullSpace->next;
+ 187              		.loc 1 74 13
+ 188              		.loc 1 74 40 is_stmt 0
+ 189 00ec 83B70601 		ld	a5,16(a3)
+ 190              		.loc 1 74 27
+ 191 00f0 2338F500 		sd	a5,16(a0)
+ 192              	.L14:
+  75:src/mem.cpp   ****         else
+  76:src/mem.cpp   ****             newFull->next = fullHead;
+  77:src/mem.cpp   **** 
+  78:src/mem.cpp   ****         if(newFull->next)
+ 193              		.loc 1 78 9 is_stmt 1
+ 194              		.loc 1 78 21 is_stmt 0
+ 195 00f4 83370501 		ld	a5,16(a0)
+ 196              		.loc 1 78 9
+ 197 00f8 63840700 		beqz	a5,.L15
+  79:src/mem.cpp   ****             newFull->next->prev = newFull;
+ 198              		.loc 1 79 13 is_stmt 1
+ 199              		.loc 1 79 33 is_stmt 0
+ 200 00fc 23B4A700 		sd	a0,8(a5)
+ 201              	.L15:
+  80:src/mem.cpp   **** 
+  81:src/mem.cpp   ****         if (fullSpace)
+ 202              		.loc 1 81 9 is_stmt 1
+ 203 0100 63840602 		beqz	a3,.L16
+  82:src/mem.cpp   ****             fullSpace->next = newFull;
+ 204              		.loc 1 82 13
+ 205              		.loc 1 82 29 is_stmt 0
+ 206 0104 23B8A600 		sd	a0,16(a3)
+ 207              	.L17:
+  83:src/mem.cpp   ****         else
+  84:src/mem.cpp   ****             fullHead = newFull;
+  85:src/mem.cpp   **** 
+  86:src/mem.cpp   ****         return (void*)(headerSize + (char*)newFull);
+ 208              		.loc 1 86 9 is_stmt 1
+ 209              		.loc 1 86 51 is_stmt 0
+ 210 0108 13058501 		addi	a0,a0,24
+ 211              	.LVL11:
+ 212              	.L1:
+ 213              	.LBE11:
+  87:src/mem.cpp   ****     }
+  88:src/mem.cpp   ****     return nullptr;
+  89:src/mem.cpp   **** }
+ 214              		.loc 1 89 1
+ 215 010c 03348100 		ld	s0,8(sp)
+ 216              		.cfi_remember_state
+ 217              		.cfi_restore 8
+ 218              		.cfi_def_cfa 2, 16
+GAS LISTING /tmp/ccpyAonF.s 			page 7
+
+
+ 219 0110 13010101 		addi	sp,sp,16
+ 220              		.cfi_def_cfa_offset 0
+ 221 0114 67800000 		jr	ra
+ 222              	.LVL12:
+ 223              	.L13:
+ 224              		.cfi_restore_state
+ 225              	.LBB12:
+  76:src/mem.cpp   **** 
+ 226              		.loc 1 76 13 is_stmt 1
+  76:src/mem.cpp   **** 
+ 227              		.loc 1 76 27 is_stmt 0
+ 228 0118 97070000 		ld	a5,.LANCHOR0+8
+ 228      83B70700 
+ 229 0120 2338F500 		sd	a5,16(a0)
+ 230 0124 6FF01FFD 		j	.L14
+ 231              	.L16:
+  84:src/mem.cpp   **** 
+ 232              		.loc 1 84 13 is_stmt 1
+  84:src/mem.cpp   **** 
+ 233              		.loc 1 84 22 is_stmt 0
+ 234 0128 97070000 		sd	a0,.LANCHOR0+8,a5
+ 234      23B0A700 
+ 235 0130 6FF09FFD 		j	.L17
+ 236              	.LVL13:
+ 237              	.L18:
+ 238              	.LBE12:
+  19:src/mem.cpp   **** 
+ 239              		.loc 1 19 16
+ 240 0134 13050000 		li	a0,0
+ 241              	.LVL14:
+ 242 0138 6FF05FFD 		j	.L1
+ 243              		.cfi_endproc
+ 244              	.LFE4:
+ 246              		.align	2
+ 247              		.globl	_ZN3MEM4initEv
+ 249              	_ZN3MEM4initEv:
+ 250              	.LFB3:
+   6:src/mem.cpp   ****     freeHead = (FreeSpace*)HEAP_START_ADDR;
+ 251              		.loc 1 6 17 is_stmt 1
+ 252              		.cfi_startproc
+ 253 013c 130101FF 		addi	sp,sp,-16
+ 254              		.cfi_def_cfa_offset 16
+ 255 0140 23341100 		sd	ra,8(sp)
+ 256 0144 23308100 		sd	s0,0(sp)
+ 257              		.cfi_offset 1, -8
+ 258              		.cfi_offset 8, -16
+ 259 0148 13040101 		addi	s0,sp,16
+ 260              		.cfi_def_cfa 8, 0
+   7:src/mem.cpp   **** 
+ 261              		.loc 1 7 5
+   7:src/mem.cpp   **** 
+ 262              		.loc 1 7 14 is_stmt 0
+ 263 014c 97070000 		la	a5,HEAP_START_ADDR
+ 263      83B70700 
+ 264 0154 83B70700 		ld	a5,0(a5)
+ 265 0158 97060000 		lla	a3,.LANCHOR0
+ 265      93860600 
+GAS LISTING /tmp/ccpyAonF.s 			page 8
+
+
+ 266 0160 23B0F600 		sd	a5,0(a3)
+   9:src/mem.cpp   ****     freeHead->prev = nullptr;
+ 267              		.loc 1 9 5 is_stmt 1
+   9:src/mem.cpp   ****     freeHead->prev = nullptr;
+ 268              		.loc 1 9 44 is_stmt 0
+ 269 0164 17070000 		la	a4,HEAP_END_ADDR
+ 269      03370700 
+ 270 016c 03370700 		ld	a4,0(a4)
+ 271 0170 3307F740 		sub	a4,a4,a5
+   9:src/mem.cpp   ****     freeHead->prev = nullptr;
+ 272              		.loc 1 9 20
+ 273 0174 23B0E700 		sd	a4,0(a5)
+  10:src/mem.cpp   ****     freeHead->next = nullptr;
+ 274              		.loc 1 10 5 is_stmt 1
+  10:src/mem.cpp   ****     freeHead->next = nullptr;
+ 275              		.loc 1 10 15 is_stmt 0
+ 276 0178 83B70600 		ld	a5,0(a3)
+  10:src/mem.cpp   ****     freeHead->next = nullptr;
+ 277              		.loc 1 10 20
+ 278 017c 23B40700 		sd	zero,8(a5)
+  11:src/mem.cpp   **** 
+ 279              		.loc 1 11 5 is_stmt 1
+  11:src/mem.cpp   **** 
+ 280              		.loc 1 11 20 is_stmt 0
+ 281 0180 23B80700 		sd	zero,16(a5)
+  13:src/mem.cpp   **** }
+ 282              		.loc 1 13 5 is_stmt 1
+  13:src/mem.cpp   **** }
+ 283              		.loc 1 13 18 is_stmt 0
+ 284 0184 13051000 		li	a0,1
+ 285 0188 97000000 		call	_ZN3MEM8memAllocEm
+ 285      E7800000 
+ 286              	.LVL15:
+  14:src/mem.cpp   **** 
+ 287              		.loc 1 14 1
+ 288 0190 83308100 		ld	ra,8(sp)
+ 289              		.cfi_restore 1
+ 290 0194 03340100 		ld	s0,0(sp)
+ 291              		.cfi_restore 8
+ 292              		.cfi_def_cfa 2, 16
+ 293 0198 13010101 		addi	sp,sp,16
+ 294              		.cfi_def_cfa_offset 0
+ 295 019c 67800000 		jr	ra
+ 296              		.cfi_endproc
+ 297              	.LFE3:
+ 299              		.align	2
+ 300              		.globl	_ZN3MEM9tryToJoinEPNS_9FreeSpaceES1_
+ 302              	_ZN3MEM9tryToJoinEPNS_9FreeSpaceES1_:
+ 303              	.LFB6:
+  90:src/mem.cpp   **** 
+  91:src/mem.cpp   **** int MEM::memFree(void *address) {
+  92:src/mem.cpp   **** 
+  93:src/mem.cpp   ****     if (address == nullptr)
+  94:src/mem.cpp   ****         return -1;
+  95:src/mem.cpp   **** 
+  96:src/mem.cpp   ****     //dolazak do nase adrese koja mora da bude pocetak segmenta
+  97:src/mem.cpp   ****     address = (void*)((char*)address - headerSize);
+GAS LISTING /tmp/ccpyAonF.s 			page 9
+
+
+  98:src/mem.cpp   ****     FullSpace* fullSpace = fullHead;
+  99:src/mem.cpp   ****     auto* addressSegment = (FullSpace*)address;
+ 100:src/mem.cpp   ****     bool isStartOfSegment = false;
+ 101:src/mem.cpp   **** 
+ 102:src/mem.cpp   ****     while(fullSpace && addressSegment>=fullSpace){
+ 103:src/mem.cpp   ****         if(fullSpace == addressSegment) {
+ 104:src/mem.cpp   ****             isStartOfSegment = true;
+ 105:src/mem.cpp   ****             break;
+ 106:src/mem.cpp   ****         }
+ 107:src/mem.cpp   ****         fullSpace = fullSpace->next;
+ 108:src/mem.cpp   ****     }
+ 109:src/mem.cpp   **** 
+ 110:src/mem.cpp   ****     if (!isStartOfSegment)
+ 111:src/mem.cpp   ****         return -1;
+ 112:src/mem.cpp   ****     else
+ 113:src/mem.cpp   ****         addressSegment = fullSpace;
+ 114:src/mem.cpp   **** 
+ 115:src/mem.cpp   ****     //odvezivanje tog segmenta
+ 116:src/mem.cpp   ****     if (addressSegment->prev)
+ 117:src/mem.cpp   ****         addressSegment->prev->next = addressSegment->next;
+ 118:src/mem.cpp   ****     else
+ 119:src/mem.cpp   ****         fullHead = addressSegment->next;
+ 120:src/mem.cpp   **** 
+ 121:src/mem.cpp   ****     if (addressSegment->next)
+ 122:src/mem.cpp   ****         addressSegment->next->prev = addressSegment->prev;
+ 123:src/mem.cpp   **** 
+ 124:src/mem.cpp   ****     //trazenje gde da se smesti u slobodnim segmentima
+ 125:src/mem.cpp   ****     FreeSpace* freeSpace = freeHead;
+ 126:src/mem.cpp   ****     while(freeSpace->next != nullptr && (char*)address > (char*)(freeSpace->next)){
+ 127:src/mem.cpp   ****         freeSpace = freeSpace->next;
+ 128:src/mem.cpp   ****     }
+ 129:src/mem.cpp   **** 
+ 130:src/mem.cpp   ****     //try toJoin sa onim pre njega
+ 131:src/mem.cpp   ****     if((char*)freeSpace + freeSpace->size == address){
+ 132:src/mem.cpp   ****         freeSpace->size += addressSegment->size;
+ 133:src/mem.cpp   ****         if (freeSpace->next && (char*)((char*)freeSpace + freeSpace->size) == (char*)(freeSpace->ne
+ 134:src/mem.cpp   **** 
+ 135:src/mem.cpp   ****             freeSpace->size += freeSpace->next->size;
+ 136:src/mem.cpp   ****             freeSpace->next = freeSpace->next->next;
+ 137:src/mem.cpp   **** 
+ 138:src/mem.cpp   ****             if (freeSpace->next)
+ 139:src/mem.cpp   ****                 freeSpace->next->prev = freeSpace;
+ 140:src/mem.cpp   ****         }
+ 141:src/mem.cpp   ****         return 0;
+ 142:src/mem.cpp   **** 
+ 143:src/mem.cpp   ****     } else { //tryToJoin sa onim posle njega
+ 144:src/mem.cpp   **** 
+ 145:src/mem.cpp   ****         FreeSpace *nextSegment = freeSpace->next;
+ 146:src/mem.cpp   **** 
+ 147:src/mem.cpp   ****         auto *newSegment = (FreeSpace *) address;
+ 148:src/mem.cpp   ****         newSegment->size = addressSegment->size;
+ 149:src/mem.cpp   ****         if(nextSegment && tryToJoin(newSegment, nextSegment))
+ 150:src/mem.cpp   ****             return 0;
+ 151:src/mem.cpp   ****         else{
+ 152:src/mem.cpp   ****             //uvezivanje sa ostatkom
+ 153:src/mem.cpp   ****             newSegment->prev = freeSpace;
+ 154:src/mem.cpp   ****             newSegment->next = freeSpace->next;
+GAS LISTING /tmp/ccpyAonF.s 			page 10
+
+
+ 155:src/mem.cpp   **** 
+ 156:src/mem.cpp   ****             if (newSegment->next)
+ 157:src/mem.cpp   ****                 newSegment->next->prev = newSegment;
+ 158:src/mem.cpp   **** 
+ 159:src/mem.cpp   ****             freeSpace->next = newSegment;
+ 160:src/mem.cpp   **** 
+ 161:src/mem.cpp   ****             return 0;
+ 162:src/mem.cpp   ****         }
+ 163:src/mem.cpp   ****     }
+ 164:src/mem.cpp   **** }
+ 165:src/mem.cpp   **** 
+ 166:src/mem.cpp   **** 
+ 167:src/mem.cpp   **** //ovo se moglo bolje implementirati
+ 168:src/mem.cpp   **** int MEM::tryToJoin(FreeSpace *firstSegment, FreeSpace* secondSegment){
+ 304              		.loc 1 168 70 is_stmt 1
+ 305              		.cfi_startproc
+ 306              	.LVL16:
+ 307 01a0 130101FF 		addi	sp,sp,-16
+ 308              		.cfi_def_cfa_offset 16
+ 309 01a4 23348100 		sd	s0,8(sp)
+ 310              		.cfi_offset 8, -8
+ 311 01a8 13040101 		addi	s0,sp,16
+ 312              		.cfi_def_cfa 8, 0
+ 169:src/mem.cpp   ****     if((char*)firstSegment + firstSegment->size == (char*)secondSegment){
+ 313              		.loc 1 169 5
+ 314              		.loc 1 169 44 is_stmt 0
+ 315 01ac 83370500 		ld	a5,0(a0)
+ 316              		.loc 1 169 28
+ 317 01b0 3307F500 		add	a4,a0,a5
+ 318              		.loc 1 169 5
+ 319 01b4 630AB700 		beq	a4,a1,.L32
+ 170:src/mem.cpp   **** 
+ 171:src/mem.cpp   ****         firstSegment->size += secondSegment->size;
+ 172:src/mem.cpp   ****         firstSegment->prev = secondSegment->prev;
+ 173:src/mem.cpp   ****         firstSegment->next = secondSegment->next;
+ 174:src/mem.cpp   **** 
+ 175:src/mem.cpp   ****         if (secondSegment->prev)
+ 176:src/mem.cpp   ****             secondSegment->prev->next = firstSegment;
+ 177:src/mem.cpp   ****         else
+ 178:src/mem.cpp   ****             freeHead = firstSegment;
+ 179:src/mem.cpp   **** 
+ 180:src/mem.cpp   ****         if (secondSegment->next)
+ 181:src/mem.cpp   ****             secondSegment->next->prev = firstSegment;
+ 182:src/mem.cpp   **** 
+ 183:src/mem.cpp   ****         return 1;
+ 184:src/mem.cpp   ****     }
+ 185:src/mem.cpp   ****     return 0;
+ 320              		.loc 1 185 12
+ 321 01b8 13050000 		li	a0,0
+ 322              	.LVL17:
+ 323              	.L26:
+ 186:src/mem.cpp   **** }
+ 324              		.loc 1 186 1
+ 325 01bc 03348100 		ld	s0,8(sp)
+ 326              		.cfi_remember_state
+ 327              		.cfi_restore 8
+ 328              		.cfi_def_cfa 2, 16
+GAS LISTING /tmp/ccpyAonF.s 			page 11
+
+
+ 329 01c0 13010101 		addi	sp,sp,16
+ 330              		.cfi_def_cfa_offset 0
+ 331 01c4 67800000 		jr	ra
+ 332              	.LVL18:
+ 333              	.L32:
+ 334              		.cfi_restore_state
+ 171:src/mem.cpp   ****         firstSegment->prev = secondSegment->prev;
+ 335              		.loc 1 171 9 is_stmt 1
+ 171:src/mem.cpp   ****         firstSegment->prev = secondSegment->prev;
+ 336              		.loc 1 171 46 is_stmt 0
+ 337 01c8 03B70500 		ld	a4,0(a1)
+ 171:src/mem.cpp   ****         firstSegment->prev = secondSegment->prev;
+ 338              		.loc 1 171 28
+ 339 01cc B387E700 		add	a5,a5,a4
+ 340 01d0 2330F500 		sd	a5,0(a0)
+ 172:src/mem.cpp   ****         firstSegment->next = secondSegment->next;
+ 341              		.loc 1 172 9 is_stmt 1
+ 172:src/mem.cpp   ****         firstSegment->next = secondSegment->next;
+ 342              		.loc 1 172 45 is_stmt 0
+ 343 01d4 83B78500 		ld	a5,8(a1)
+ 172:src/mem.cpp   ****         firstSegment->next = secondSegment->next;
+ 344              		.loc 1 172 28
+ 345 01d8 2334F500 		sd	a5,8(a0)
+ 173:src/mem.cpp   **** 
+ 346              		.loc 1 173 9 is_stmt 1
+ 173:src/mem.cpp   **** 
+ 347              		.loc 1 173 45 is_stmt 0
+ 348 01dc 83B70501 		ld	a5,16(a1)
+ 173:src/mem.cpp   **** 
+ 349              		.loc 1 173 28
+ 350 01e0 2338F500 		sd	a5,16(a0)
+ 175:src/mem.cpp   ****             secondSegment->prev->next = firstSegment;
+ 351              		.loc 1 175 9 is_stmt 1
+ 175:src/mem.cpp   ****             secondSegment->prev->next = firstSegment;
+ 352              		.loc 1 175 28 is_stmt 0
+ 353 01e4 83B78500 		ld	a5,8(a1)
+ 175:src/mem.cpp   ****             secondSegment->prev->next = firstSegment;
+ 354              		.loc 1 175 9
+ 355 01e8 638E0700 		beqz	a5,.L27
+ 176:src/mem.cpp   ****         else
+ 356              		.loc 1 176 13 is_stmt 1
+ 176:src/mem.cpp   ****         else
+ 357              		.loc 1 176 39 is_stmt 0
+ 358 01ec 23B8A700 		sd	a0,16(a5)
+ 359              	.L28:
+ 180:src/mem.cpp   ****             secondSegment->next->prev = firstSegment;
+ 360              		.loc 1 180 9 is_stmt 1
+ 180:src/mem.cpp   ****             secondSegment->next->prev = firstSegment;
+ 361              		.loc 1 180 28 is_stmt 0
+ 362 01f0 83B70501 		ld	a5,16(a1)
+ 180:src/mem.cpp   ****             secondSegment->next->prev = firstSegment;
+ 363              		.loc 1 180 9
+ 364 01f4 63840700 		beqz	a5,.L29
+ 181:src/mem.cpp   **** 
+ 365              		.loc 1 181 13 is_stmt 1
+ 181:src/mem.cpp   **** 
+ 366              		.loc 1 181 39 is_stmt 0
+GAS LISTING /tmp/ccpyAonF.s 			page 12
+
+
+ 367 01f8 23B4A700 		sd	a0,8(a5)
+ 368              	.L29:
+ 183:src/mem.cpp   ****     }
+ 369              		.loc 1 183 9 is_stmt 1
+ 183:src/mem.cpp   ****     }
+ 370              		.loc 1 183 16 is_stmt 0
+ 371 01fc 13051000 		li	a0,1
+ 372              	.LVL19:
+ 373 0200 6FF0DFFB 		j	.L26
+ 374              	.LVL20:
+ 375              	.L27:
+ 178:src/mem.cpp   **** 
+ 376              		.loc 1 178 13 is_stmt 1
+ 178:src/mem.cpp   **** 
+ 377              		.loc 1 178 22 is_stmt 0
+ 378 0204 97070000 		sd	a0,.LANCHOR0,a5
+ 378      23B0A700 
+ 379 020c 6FF05FFE 		j	.L28
+ 380              		.cfi_endproc
+ 381              	.LFE6:
+ 383              		.align	2
+ 384              		.globl	_ZN3MEM7memFreeEPv
+ 386              	_ZN3MEM7memFreeEPv:
+ 387              	.LFB5:
+  91:src/mem.cpp   **** 
+ 388              		.loc 1 91 33 is_stmt 1
+ 389              		.cfi_startproc
+ 390              	.LVL21:
+  93:src/mem.cpp   ****         return -1;
+ 391              		.loc 1 93 5
+ 392 0210 63020514 		beqz	a0,.L46
+  91:src/mem.cpp   **** 
+ 393              		.loc 1 91 33 is_stmt 0
+ 394 0214 130101FD 		addi	sp,sp,-48
+ 395              		.cfi_def_cfa_offset 48
+ 396 0218 23341102 		sd	ra,40(sp)
+ 397 021c 23308102 		sd	s0,32(sp)
+ 398 0220 233C9100 		sd	s1,24(sp)
+ 399 0224 23382101 		sd	s2,16(sp)
+ 400 0228 23343101 		sd	s3,8(sp)
+ 401              		.cfi_offset 1, -8
+ 402              		.cfi_offset 8, -16
+ 403              		.cfi_offset 9, -24
+ 404              		.cfi_offset 18, -32
+ 405              		.cfi_offset 19, -40
+ 406 022c 13040103 		addi	s0,sp,48
+ 407              		.cfi_def_cfa 8, 0
+ 408 0230 93090500 		mv	s3,a0
+  97:src/mem.cpp   ****     FullSpace* fullSpace = fullHead;
+ 409              		.loc 1 97 5 is_stmt 1
+  97:src/mem.cpp   ****     FullSpace* fullSpace = fullHead;
+ 410              		.loc 1 97 13 is_stmt 0
+ 411 0234 930485FE 		addi	s1,a0,-24
+ 412              	.LVL22:
+  98:src/mem.cpp   ****     auto* addressSegment = (FullSpace*)address;
+ 413              		.loc 1 98 5 is_stmt 1
+  98:src/mem.cpp   ****     auto* addressSegment = (FullSpace*)address;
+GAS LISTING /tmp/ccpyAonF.s 			page 13
+
+
+ 414              		.loc 1 98 16 is_stmt 0
+ 415 0238 97070000 		ld	a5,.LANCHOR0+8
+ 415      83B70700 
+ 416              	.LVL23:
+  99:src/mem.cpp   ****     bool isStartOfSegment = false;
+ 417              		.loc 1 99 5 is_stmt 1
+ 100:src/mem.cpp   **** 
+ 418              		.loc 1 100 5
+ 419 0240 6F008000 		j	.L36
+ 420              	.L56:
+ 107:src/mem.cpp   ****     }
+ 421              		.loc 1 107 9
+ 107:src/mem.cpp   ****     }
+ 422              		.loc 1 107 19 is_stmt 0
+ 423 0244 83B70701 		ld	a5,16(a5)
+ 424              	.LVL24:
+ 425              	.L36:
+ 102:src/mem.cpp   ****         if(fullSpace == addressSegment) {
+ 426              		.loc 1 102 5 is_stmt 1
+ 102:src/mem.cpp   ****         if(fullSpace == addressSegment) {
+ 427              		.loc 1 102 21
+ 428 0248 638A0700 		beqz	a5,.L47
+ 102:src/mem.cpp   ****         if(fullSpace == addressSegment) {
+ 429              		.loc 1 102 21 is_stmt 0 discriminator 1
+ 430 024c 63E8F40A 		bgtu	a5,s1,.L48
+ 103:src/mem.cpp   ****             isStartOfSegment = true;
+ 431              		.loc 1 103 9 is_stmt 1
+ 432 0250 E39A97FE 		bne	a5,s1,.L56
+ 104:src/mem.cpp   ****             break;
+ 433              		.loc 1 104 30 is_stmt 0
+ 434 0254 13071000 		li	a4,1
+ 435 0258 6F008000 		j	.L35
+ 436              	.L47:
+ 100:src/mem.cpp   **** 
+ 437              		.loc 1 100 10
+ 438 025c 13070000 		li	a4,0
+ 439              	.L35:
+ 440              	.LVL25:
+ 110:src/mem.cpp   ****         return -1;
+ 441              		.loc 1 110 5 is_stmt 1
+ 442 0260 630E070E 		beqz	a4,.L50
+ 113:src/mem.cpp   **** 
+ 443              		.loc 1 113 9
+ 444              	.LVL26:
+ 116:src/mem.cpp   ****         addressSegment->prev->next = addressSegment->next;
+ 445              		.loc 1 116 5
+ 116:src/mem.cpp   ****         addressSegment->prev->next = addressSegment->next;
+ 446              		.loc 1 116 25 is_stmt 0
+ 447 0264 03B78700 		ld	a4,8(a5)
+ 448              	.LVL27:
+ 116:src/mem.cpp   ****         addressSegment->prev->next = addressSegment->next;
+ 449              		.loc 1 116 5
+ 450 0268 630E0708 		beqz	a4,.L37
+ 117:src/mem.cpp   ****     else
+ 451              		.loc 1 117 9 is_stmt 1
+ 117:src/mem.cpp   ****     else
+ 452              		.loc 1 117 54 is_stmt 0
+GAS LISTING /tmp/ccpyAonF.s 			page 14
+
+
+ 453 026c 83B60701 		ld	a3,16(a5)
+ 117:src/mem.cpp   ****     else
+ 454              		.loc 1 117 36
+ 455 0270 2338D700 		sd	a3,16(a4)
+ 456              	.L38:
+ 121:src/mem.cpp   ****         addressSegment->next->prev = addressSegment->prev;
+ 457              		.loc 1 121 5 is_stmt 1
+ 121:src/mem.cpp   ****         addressSegment->next->prev = addressSegment->prev;
+ 458              		.loc 1 121 25 is_stmt 0
+ 459 0274 03B70701 		ld	a4,16(a5)
+ 121:src/mem.cpp   ****         addressSegment->next->prev = addressSegment->prev;
+ 460              		.loc 1 121 5
+ 461 0278 63060700 		beqz	a4,.L39
+ 122:src/mem.cpp   **** 
+ 462              		.loc 1 122 9 is_stmt 1
+ 122:src/mem.cpp   **** 
+ 463              		.loc 1 122 54 is_stmt 0
+ 464 027c 83B68700 		ld	a3,8(a5)
+ 122:src/mem.cpp   **** 
+ 465              		.loc 1 122 36
+ 466 0280 2334D700 		sd	a3,8(a4)
+ 467              	.L39:
+ 125:src/mem.cpp   ****     while(freeSpace->next != nullptr && (char*)address > (char*)(freeSpace->next)){
+ 468              		.loc 1 125 5 is_stmt 1
+ 125:src/mem.cpp   ****     while(freeSpace->next != nullptr && (char*)address > (char*)(freeSpace->next)){
+ 469              		.loc 1 125 16 is_stmt 0
+ 470 0284 97050000 		ld	a1,.LANCHOR0
+ 470      83B50500 
+ 471              	.LVL28:
+ 472              	.L41:
+ 126:src/mem.cpp   ****         freeSpace = freeSpace->next;
+ 473              		.loc 1 126 5 is_stmt 1
+ 126:src/mem.cpp   ****         freeSpace = freeSpace->next;
+ 474              		.loc 1 126 38
+ 475 028c 13890500 		mv	s2,a1
+ 126:src/mem.cpp   ****         freeSpace = freeSpace->next;
+ 476              		.loc 1 126 22 is_stmt 0
+ 477 0290 83B50501 		ld	a1,16(a1)
+ 478              	.LVL29:
+ 126:src/mem.cpp   ****         freeSpace = freeSpace->next;
+ 479              		.loc 1 126 38
+ 480 0294 63840500 		beqz	a1,.L40
+ 126:src/mem.cpp   ****         freeSpace = freeSpace->next;
+ 481              		.loc 1 126 38 discriminator 1
+ 482 0298 E3EA95FE 		bltu	a1,s1,.L41
+ 483              	.L40:
+ 131:src/mem.cpp   ****         freeSpace->size += addressSegment->size;
+ 484              		.loc 1 131 5 is_stmt 1
+ 485              	.LBB13:
+ 131:src/mem.cpp   ****         freeSpace->size += addressSegment->size;
+ 486              		.loc 1 131 38 is_stmt 0
+ 487 029c 03370900 		ld	a4,0(s2)
+ 131:src/mem.cpp   ****         freeSpace->size += addressSegment->size;
+ 488              		.loc 1 131 25
+ 489 02a0 B306E900 		add	a3,s2,a4
+ 131:src/mem.cpp   ****         freeSpace->size += addressSegment->size;
+ 490              		.loc 1 131 5
+GAS LISTING /tmp/ccpyAonF.s 			page 15
+
+
+ 491 02a4 63889606 		beq	a3,s1,.L57
+ 492              	.LBB14:
+ 145:src/mem.cpp   **** 
+ 493              		.loc 1 145 9 is_stmt 1
+ 494              	.LVL30:
+ 147:src/mem.cpp   ****         newSegment->size = addressSegment->size;
+ 495              		.loc 1 147 9
+ 148:src/mem.cpp   ****         if(nextSegment && tryToJoin(newSegment, nextSegment))
+ 496              		.loc 1 148 9
+ 148:src/mem.cpp   ****         if(nextSegment && tryToJoin(newSegment, nextSegment))
+ 497              		.loc 1 148 44 is_stmt 0
+ 498 02a8 83B70700 		ld	a5,0(a5)
+ 499              	.LVL31:
+ 148:src/mem.cpp   ****         if(nextSegment && tryToJoin(newSegment, nextSegment))
+ 500              		.loc 1 148 26
+ 501 02ac 23B4F9FE 		sd	a5,-24(s3)
+ 149:src/mem.cpp   ****             return 0;
+ 502              		.loc 1 149 9 is_stmt 1
+ 149:src/mem.cpp   ****             return 0;
+ 503              		.loc 1 149 24 is_stmt 0
+ 504 02b0 638A0500 		beqz	a1,.L44
+ 149:src/mem.cpp   ****             return 0;
+ 505              		.loc 1 149 36 discriminator 1
+ 506 02b4 13850400 		mv	a0,s1
+ 507 02b8 97000000 		call	_ZN3MEM9tryToJoinEPNS_9FreeSpaceES1_
+ 507      E7800000 
+ 508              	.LVL32:
+ 149:src/mem.cpp   ****             return 0;
+ 509              		.loc 1 149 24 discriminator 1
+ 510 02c0 6312050A 		bnez	a0,.L51
+ 511              	.L44:
+ 153:src/mem.cpp   ****             newSegment->next = freeSpace->next;
+ 512              		.loc 1 153 13 is_stmt 1 discriminator 4
+ 153:src/mem.cpp   ****             newSegment->next = freeSpace->next;
+ 513              		.loc 1 153 30 is_stmt 0 discriminator 4
+ 514 02c4 23B829FF 		sd	s2,-16(s3)
+ 154:src/mem.cpp   **** 
+ 515              		.loc 1 154 13 is_stmt 1 discriminator 4
+ 154:src/mem.cpp   **** 
+ 516              		.loc 1 154 43 is_stmt 0 discriminator 4
+ 517 02c8 83370901 		ld	a5,16(s2)
+ 154:src/mem.cpp   **** 
+ 518              		.loc 1 154 30 discriminator 4
+ 519 02cc 23BCF9FE 		sd	a5,-8(s3)
+ 156:src/mem.cpp   ****                 newSegment->next->prev = newSegment;
+ 520              		.loc 1 156 13 is_stmt 1 discriminator 4
+ 521 02d0 63840700 		beqz	a5,.L45
+ 157:src/mem.cpp   **** 
+ 522              		.loc 1 157 17
+ 157:src/mem.cpp   **** 
+ 523              		.loc 1 157 40 is_stmt 0
+ 524 02d4 23B49700 		sd	s1,8(a5)
+ 525              	.L45:
+ 159:src/mem.cpp   **** 
+ 526              		.loc 1 159 13 is_stmt 1
+ 159:src/mem.cpp   **** 
+ 527              		.loc 1 159 29 is_stmt 0
+GAS LISTING /tmp/ccpyAonF.s 			page 16
+
+
+ 528 02d8 23389900 		sd	s1,16(s2)
+ 161:src/mem.cpp   ****         }
+ 529              		.loc 1 161 13 is_stmt 1
+ 161:src/mem.cpp   ****         }
+ 530              		.loc 1 161 20 is_stmt 0
+ 531 02dc 13050000 		li	a0,0
+ 532              	.LVL33:
+ 533              	.L34:
+ 534              	.LBE14:
+ 535              	.LBE13:
+ 164:src/mem.cpp   **** 
+ 536              		.loc 1 164 1
+ 537 02e0 83308102 		ld	ra,40(sp)
+ 538              		.cfi_remember_state
+ 539              		.cfi_restore 1
+ 540 02e4 03340102 		ld	s0,32(sp)
+ 541              		.cfi_restore 8
+ 542              		.cfi_def_cfa 2, 48
+ 543 02e8 83348101 		ld	s1,24(sp)
+ 544              		.cfi_restore 9
+ 545              	.LVL34:
+ 546 02ec 03390101 		ld	s2,16(sp)
+ 547              		.cfi_restore 18
+ 548 02f0 83398100 		ld	s3,8(sp)
+ 549              		.cfi_restore 19
+ 550              	.LVL35:
+ 551 02f4 13010103 		addi	sp,sp,48
+ 552              		.cfi_def_cfa_offset 0
+ 553 02f8 67800000 		jr	ra
+ 554              	.LVL36:
+ 555              	.L48:
+ 556              		.cfi_restore_state
+ 100:src/mem.cpp   **** 
+ 557              		.loc 1 100 10
+ 558 02fc 13070000 		li	a4,0
+ 559 0300 6FF01FF6 		j	.L35
+ 560              	.LVL37:
+ 561              	.L37:
+ 119:src/mem.cpp   **** 
+ 562              		.loc 1 119 9 is_stmt 1
+ 119:src/mem.cpp   **** 
+ 563              		.loc 1 119 36 is_stmt 0
+ 564 0304 03B70701 		ld	a4,16(a5)
+ 119:src/mem.cpp   **** 
+ 565              		.loc 1 119 18
+ 566 0308 97060000 		sd	a4,.LANCHOR0+8,a3
+ 566      23B0E600 
+ 567 0310 6FF05FF6 		j	.L38
+ 568              	.LVL38:
+ 569              	.L57:
+ 570              	.LBB16:
+ 132:src/mem.cpp   ****         if (freeSpace->next && (char*)((char*)freeSpace + freeSpace->size) == (char*)(freeSpace->ne
+ 571              		.loc 1 132 9 is_stmt 1
+ 132:src/mem.cpp   ****         if (freeSpace->next && (char*)((char*)freeSpace + freeSpace->size) == (char*)(freeSpace->ne
+ 572              		.loc 1 132 44 is_stmt 0
+ 573 0314 83B70700 		ld	a5,0(a5)
+ 574              	.LVL39:
+GAS LISTING /tmp/ccpyAonF.s 			page 17
+
+
+ 132:src/mem.cpp   ****         if (freeSpace->next && (char*)((char*)freeSpace + freeSpace->size) == (char*)(freeSpace->ne
+ 575              		.loc 1 132 25
+ 576 0318 3307F700 		add	a4,a4,a5
+ 577 031c 2330E900 		sd	a4,0(s2)
+ 133:src/mem.cpp   **** 
+ 578              		.loc 1 133 9 is_stmt 1
+ 579 0320 63860500 		beqz	a1,.L43
+ 133:src/mem.cpp   **** 
+ 580              		.loc 1 133 57 is_stmt 0 discriminator 1
+ 581 0324 B307E900 		add	a5,s2,a4
+ 133:src/mem.cpp   **** 
+ 582              		.loc 1 133 29 discriminator 1
+ 583 0328 6386F500 		beq	a1,a5,.L58
+ 584              	.L43:
+ 141:src/mem.cpp   **** 
+ 585              		.loc 1 141 9 is_stmt 1
+ 141:src/mem.cpp   **** 
+ 586              		.loc 1 141 16 is_stmt 0
+ 587 032c 13050000 		li	a0,0
+ 588 0330 6FF01FFB 		j	.L34
+ 589              	.L58:
+ 135:src/mem.cpp   ****             freeSpace->next = freeSpace->next->next;
+ 590              		.loc 1 135 13 is_stmt 1
+ 135:src/mem.cpp   ****             freeSpace->next = freeSpace->next->next;
+ 591              		.loc 1 135 49 is_stmt 0
+ 592 0334 83B70500 		ld	a5,0(a1)
+ 135:src/mem.cpp   ****             freeSpace->next = freeSpace->next->next;
+ 593              		.loc 1 135 29
+ 594 0338 3307F700 		add	a4,a4,a5
+ 595 033c 2330E900 		sd	a4,0(s2)
+ 136:src/mem.cpp   **** 
+ 596              		.loc 1 136 13 is_stmt 1
+ 136:src/mem.cpp   **** 
+ 597              		.loc 1 136 48 is_stmt 0
+ 598 0340 83B70501 		ld	a5,16(a1)
+ 136:src/mem.cpp   **** 
+ 599              		.loc 1 136 29
+ 600 0344 2338F900 		sd	a5,16(s2)
+ 138:src/mem.cpp   ****                 freeSpace->next->prev = freeSpace;
+ 601              		.loc 1 138 13 is_stmt 1
+ 602 0348 E38207FE 		beqz	a5,.L43
+ 139:src/mem.cpp   ****         }
+ 603              		.loc 1 139 17
+ 139:src/mem.cpp   ****         }
+ 604              		.loc 1 139 39 is_stmt 0
+ 605 034c 23B42701 		sd	s2,8(a5)
+ 606 0350 6FF0DFFD 		j	.L43
+ 607              	.LVL40:
+ 608              	.L46:
+ 609              		.cfi_def_cfa_register 2
+ 610              		.cfi_restore 1
+ 611              		.cfi_restore 8
+ 612              		.cfi_restore 9
+ 613              		.cfi_restore 18
+ 614              		.cfi_restore 19
+ 615              	.LBE16:
+  94:src/mem.cpp   **** 
+GAS LISTING /tmp/ccpyAonF.s 			page 18
+
+
+ 616              		.loc 1 94 17
+ 617 0354 1305F0FF 		li	a0,-1
+ 618              	.LVL41:
+ 164:src/mem.cpp   **** 
+ 619              		.loc 1 164 1
+ 620 0358 67800000 		ret
+ 621              	.LVL42:
+ 622              	.L50:
+ 623              		.cfi_def_cfa_register 8
+ 624              		.cfi_offset 1, -8
+ 625              		.cfi_offset 8, -16
+ 626              		.cfi_offset 9, -24
+ 627              		.cfi_offset 18, -32
+ 628              		.cfi_offset 19, -40
+ 111:src/mem.cpp   ****     else
+ 629              		.loc 1 111 17
+ 630 035c 1305F0FF 		li	a0,-1
+ 631 0360 6FF01FF8 		j	.L34
+ 632              	.LVL43:
+ 633              	.L51:
+ 634              	.LBB17:
+ 635              	.LBB15:
+ 150:src/mem.cpp   ****         else{
+ 636              		.loc 1 150 20
+ 637 0364 13050000 		li	a0,0
+ 638 0368 6FF09FF7 		j	.L34
+ 639              	.LBE15:
+ 640              	.LBE17:
+ 641              		.cfi_endproc
+ 642              	.LFE5:
+ 644              		.globl	_ZN3MEM8freeHeadE
+ 645              		.globl	_ZN3MEM8fullHeadE
+ 646              		.bss
+ 647              		.align	3
+ 648              		.set	.LANCHOR0,. + 0
+ 651              	_ZN3MEM8freeHeadE:
+ 652 0000 00000000 		.zero	8
+ 652      00000000 
+ 655              	_ZN3MEM8fullHeadE:
+ 656 0008 00000000 		.zero	8
+ 656      00000000 
+ 657              		.text
+ 658              	.Letext0:
+ 659              		.file 2 "src/../h/../lib/hw.h"
+ 660              		.file 3 "src/../h/mem.h"
+GAS LISTING /tmp/ccpyAonF.s 			page 19
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 mem.cpp
+     /tmp/ccpyAonF.s:9      .text:0000000000000000 _ZN3MEM8memAllocEm
+     /tmp/ccpyAonF.s:13     .text:0000000000000000 .L0 
+     /tmp/ccpyAonF.s:15     .text:0000000000000000 .L0 
+     /tmp/ccpyAonF.s:16     .text:0000000000000004 .L0 
+     /tmp/ccpyAonF.s:18     .text:0000000000000008 .L0 
+     /tmp/ccpyAonF.s:20     .text:000000000000000c .L0 
+     /tmp/ccpyAonF.s:22     .text:000000000000000c .L0 
+     /tmp/ccpyAonF.s:24     .text:0000000000000010 .L0 
+     /tmp/ccpyAonF.s:25     .text:0000000000000010 .L0 
+     /tmp/ccpyAonF.s:28     .text:0000000000000014 .L0 
+     /tmp/ccpyAonF.s:29     .text:0000000000000014 .L0 
+     /tmp/ccpyAonF.s:33     .text:000000000000001c .L0 
+     /tmp/ccpyAonF.s:34     .text:000000000000001c .L0 
+     /tmp/ccpyAonF.s:38     .text:0000000000000020 .L0 
+     /tmp/ccpyAonF.s:39     .text:0000000000000020 .L0 
+     /tmp/ccpyAonF.s:41     .text:0000000000000024 .L0 
+     /tmp/ccpyAonF.s:48     .text:0000000000000028 .L0 
+     /tmp/ccpyAonF.s:49     .text:0000000000000028 .L0 
+     /tmp/ccpyAonF.s:51     .text:000000000000002c .L0 
+     /tmp/ccpyAonF.s:53     .text:0000000000000030 .L0 
+     /tmp/ccpyAonF.s:54     .text:0000000000000030 .L0 
+     /tmp/ccpyAonF.s:56     .text:0000000000000034 .L0 
+     /tmp/ccpyAonF.s:58     .text:0000000000000038 .L0 
+     /tmp/ccpyAonF.s:59     .text:0000000000000038 .L0 
+     /tmp/ccpyAonF.s:61     .text:000000000000003c .L0 
+     /tmp/ccpyAonF.s:64     .text:0000000000000040 .L0 
+     /tmp/ccpyAonF.s:65     .text:0000000000000040 .L0 
+     /tmp/ccpyAonF.s:67     .text:0000000000000044 .L0 
+     /tmp/ccpyAonF.s:69     .text:0000000000000048 .L0 
+     /tmp/ccpyAonF.s:70     .text:0000000000000048 .L0 
+     /tmp/ccpyAonF.s:72     .text:000000000000004c .L0 
+     /tmp/ccpyAonF.s:78     .text:0000000000000050 .L0 
+     /tmp/ccpyAonF.s:79     .text:0000000000000050 .L0 
+     /tmp/ccpyAonF.s:80     .text:0000000000000050 .L0 
+     /tmp/ccpyAonF.s:82     .text:0000000000000058 .L0 
+     /tmp/ccpyAonF.s:84     .text:000000000000005c .L0 
+     /tmp/ccpyAonF.s:88     .text:0000000000000060 .L0 
+     /tmp/ccpyAonF.s:89     .text:0000000000000060 .L0 
+     /tmp/ccpyAonF.s:91     .text:0000000000000064 .L0 
+     /tmp/ccpyAonF.s:94     .text:0000000000000068 .L0 
+     /tmp/ccpyAonF.s:96     .text:000000000000006c .L0 
+     /tmp/ccpyAonF.s:102    .text:0000000000000074 .L0 
+     /tmp/ccpyAonF.s:103    .text:0000000000000074 .L0 
+     /tmp/ccpyAonF.s:108    .text:0000000000000078 .L0 
+     /tmp/ccpyAonF.s:109    .text:0000000000000078 .L0 
+     /tmp/ccpyAonF.s:115    .text:000000000000007c .L0 
+     /tmp/ccpyAonF.s:116    .text:000000000000007c .L0 
+     /tmp/ccpyAonF.s:118    .text:0000000000000080 .L0 
+     /tmp/ccpyAonF.s:123    .text:000000000000008c .L0 
+     /tmp/ccpyAonF.s:124    .text:000000000000008c .L0 
+     /tmp/ccpyAonF.s:127    .text:0000000000000090 .L0 
+     /tmp/ccpyAonF.s:128    .text:0000000000000090 .L0 
+     /tmp/ccpyAonF.s:130    .text:0000000000000094 .L0 
+     /tmp/ccpyAonF.s:132    .text:0000000000000098 .L0 
+     /tmp/ccpyAonF.s:133    .text:0000000000000098 .L0 
+GAS LISTING /tmp/ccpyAonF.s 			page 20
+
+
+     /tmp/ccpyAonF.s:135    .text:000000000000009c .L0 
+     /tmp/ccpyAonF.s:137    .text:00000000000000a0 .L0 
+     /tmp/ccpyAonF.s:138    .text:00000000000000a0 .L0 
+     /tmp/ccpyAonF.s:140    .text:00000000000000a4 .L0 
+     /tmp/ccpyAonF.s:142    .text:00000000000000a8 .L0 
+     /tmp/ccpyAonF.s:144    .text:00000000000000ac .L0 
+     /tmp/ccpyAonF.s:145    .text:00000000000000ac .L0 
+     /tmp/ccpyAonF.s:147    .text:00000000000000b0 .L0 
+     /tmp/ccpyAonF.s:149    .text:00000000000000b4 .L0 
+     /tmp/ccpyAonF.s:150    .text:00000000000000b4 .L0 
+     /tmp/ccpyAonF.s:153    .text:00000000000000b8 .L0 
+     /tmp/ccpyAonF.s:154    .text:00000000000000b8 .L0 
+     /tmp/ccpyAonF.s:156    .text:00000000000000bc .L0 
+     /tmp/ccpyAonF.s:158    .text:00000000000000c0 .L0 
+     /tmp/ccpyAonF.s:159    .text:00000000000000c0 .L0 
+     /tmp/ccpyAonF.s:163    .text:00000000000000c8 .L0 
+     /tmp/ccpyAonF.s:164    .text:00000000000000c8 .L0 
+     /tmp/ccpyAonF.s:172    .text:00000000000000d4 .L0 
+     /tmp/ccpyAonF.s:179    .text:00000000000000e0 .L0 
+     /tmp/ccpyAonF.s:180    .text:00000000000000e0 .L0 
+     /tmp/ccpyAonF.s:181    .text:00000000000000e0 .L0 
+     /tmp/ccpyAonF.s:183    .text:00000000000000e4 .L0 
+     /tmp/ccpyAonF.s:184    .text:00000000000000e4 .L0 
+     /tmp/ccpyAonF.s:186    .text:00000000000000e8 .L0 
+     /tmp/ccpyAonF.s:188    .text:00000000000000ec .L0 
+     /tmp/ccpyAonF.s:189    .text:00000000000000ec .L0 
+     /tmp/ccpyAonF.s:191    .text:00000000000000f0 .L0 
+     /tmp/ccpyAonF.s:194    .text:00000000000000f4 .L0 
+     /tmp/ccpyAonF.s:195    .text:00000000000000f4 .L0 
+     /tmp/ccpyAonF.s:197    .text:00000000000000f8 .L0 
+     /tmp/ccpyAonF.s:199    .text:00000000000000fc .L0 
+     /tmp/ccpyAonF.s:200    .text:00000000000000fc .L0 
+     /tmp/ccpyAonF.s:203    .text:0000000000000100 .L0 
+     /tmp/ccpyAonF.s:205    .text:0000000000000104 .L0 
+     /tmp/ccpyAonF.s:206    .text:0000000000000104 .L0 
+     /tmp/ccpyAonF.s:209    .text:0000000000000108 .L0 
+     /tmp/ccpyAonF.s:210    .text:0000000000000108 .L0 
+     /tmp/ccpyAonF.s:215    .text:000000000000010c .L0 
+     /tmp/ccpyAonF.s:216    .text:0000000000000110 .L0 
+     /tmp/ccpyAonF.s:217    .text:0000000000000110 .L0 
+     /tmp/ccpyAonF.s:218    .text:0000000000000110 .L0 
+     /tmp/ccpyAonF.s:220    .text:0000000000000114 .L0 
+     /tmp/ccpyAonF.s:224    .text:0000000000000118 .L0 
+     /tmp/ccpyAonF.s:227    .text:0000000000000118 .L0 
+     /tmp/ccpyAonF.s:228    .text:0000000000000118 .L0 
+     /tmp/ccpyAonF.s:233    .text:0000000000000128 .L0 
+     /tmp/ccpyAonF.s:234    .text:0000000000000128 .L0 
+     /tmp/ccpyAonF.s:240    .text:0000000000000134 .L0 
+     /tmp/ccpyAonF.s:243    .text:000000000000013c .L0 
+     /tmp/ccpyAonF.s:249    .text:000000000000013c _ZN3MEM4initEv
+     /tmp/ccpyAonF.s:252    .text:000000000000013c .L0 
+     /tmp/ccpyAonF.s:253    .text:000000000000013c .L0 
+     /tmp/ccpyAonF.s:254    .text:0000000000000140 .L0 
+     /tmp/ccpyAonF.s:257    .text:0000000000000148 .L0 
+     /tmp/ccpyAonF.s:258    .text:0000000000000148 .L0 
+     /tmp/ccpyAonF.s:260    .text:000000000000014c .L0 
+     /tmp/ccpyAonF.s:262    .text:000000000000014c .L0 
+GAS LISTING /tmp/ccpyAonF.s 			page 21
+
+
+     /tmp/ccpyAonF.s:263    .text:000000000000014c .L0 
+     /tmp/ccpyAonF.s:268    .text:0000000000000164 .L0 
+     /tmp/ccpyAonF.s:269    .text:0000000000000164 .L0 
+     /tmp/ccpyAonF.s:273    .text:0000000000000174 .L0 
+     /tmp/ccpyAonF.s:275    .text:0000000000000178 .L0 
+     /tmp/ccpyAonF.s:276    .text:0000000000000178 .L0 
+     /tmp/ccpyAonF.s:278    .text:000000000000017c .L0 
+     /tmp/ccpyAonF.s:280    .text:0000000000000180 .L0 
+     /tmp/ccpyAonF.s:281    .text:0000000000000180 .L0 
+     /tmp/ccpyAonF.s:283    .text:0000000000000184 .L0 
+     /tmp/ccpyAonF.s:284    .text:0000000000000184 .L0 
+     /tmp/ccpyAonF.s:288    .text:0000000000000190 .L0 
+     /tmp/ccpyAonF.s:289    .text:0000000000000194 .L0 
+     /tmp/ccpyAonF.s:291    .text:0000000000000198 .L0 
+     /tmp/ccpyAonF.s:292    .text:0000000000000198 .L0 
+     /tmp/ccpyAonF.s:294    .text:000000000000019c .L0 
+     /tmp/ccpyAonF.s:296    .text:00000000000001a0 .L0 
+     /tmp/ccpyAonF.s:302    .text:00000000000001a0 _ZN3MEM9tryToJoinEPNS_9FreeSpaceES1_
+     /tmp/ccpyAonF.s:305    .text:00000000000001a0 .L0 
+     /tmp/ccpyAonF.s:307    .text:00000000000001a0 .L0 
+     /tmp/ccpyAonF.s:308    .text:00000000000001a4 .L0 
+     /tmp/ccpyAonF.s:310    .text:00000000000001a8 .L0 
+     /tmp/ccpyAonF.s:312    .text:00000000000001ac .L0 
+     /tmp/ccpyAonF.s:314    .text:00000000000001ac .L0 
+     /tmp/ccpyAonF.s:315    .text:00000000000001ac .L0 
+     /tmp/ccpyAonF.s:317    .text:00000000000001b0 .L0 
+     /tmp/ccpyAonF.s:319    .text:00000000000001b4 .L0 
+     /tmp/ccpyAonF.s:321    .text:00000000000001b8 .L0 
+     /tmp/ccpyAonF.s:325    .text:00000000000001bc .L0 
+     /tmp/ccpyAonF.s:326    .text:00000000000001c0 .L0 
+     /tmp/ccpyAonF.s:327    .text:00000000000001c0 .L0 
+     /tmp/ccpyAonF.s:328    .text:00000000000001c0 .L0 
+     /tmp/ccpyAonF.s:330    .text:00000000000001c4 .L0 
+     /tmp/ccpyAonF.s:334    .text:00000000000001c8 .L0 
+     /tmp/ccpyAonF.s:336    .text:00000000000001c8 .L0 
+     /tmp/ccpyAonF.s:337    .text:00000000000001c8 .L0 
+     /tmp/ccpyAonF.s:339    .text:00000000000001cc .L0 
+     /tmp/ccpyAonF.s:342    .text:00000000000001d4 .L0 
+     /tmp/ccpyAonF.s:343    .text:00000000000001d4 .L0 
+     /tmp/ccpyAonF.s:345    .text:00000000000001d8 .L0 
+     /tmp/ccpyAonF.s:347    .text:00000000000001dc .L0 
+     /tmp/ccpyAonF.s:348    .text:00000000000001dc .L0 
+     /tmp/ccpyAonF.s:350    .text:00000000000001e0 .L0 
+     /tmp/ccpyAonF.s:352    .text:00000000000001e4 .L0 
+     /tmp/ccpyAonF.s:353    .text:00000000000001e4 .L0 
+     /tmp/ccpyAonF.s:355    .text:00000000000001e8 .L0 
+     /tmp/ccpyAonF.s:357    .text:00000000000001ec .L0 
+     /tmp/ccpyAonF.s:358    .text:00000000000001ec .L0 
+     /tmp/ccpyAonF.s:361    .text:00000000000001f0 .L0 
+     /tmp/ccpyAonF.s:362    .text:00000000000001f0 .L0 
+     /tmp/ccpyAonF.s:364    .text:00000000000001f4 .L0 
+     /tmp/ccpyAonF.s:366    .text:00000000000001f8 .L0 
+     /tmp/ccpyAonF.s:367    .text:00000000000001f8 .L0 
+     /tmp/ccpyAonF.s:370    .text:00000000000001fc .L0 
+     /tmp/ccpyAonF.s:371    .text:00000000000001fc .L0 
+     /tmp/ccpyAonF.s:377    .text:0000000000000204 .L0 
+     /tmp/ccpyAonF.s:378    .text:0000000000000204 .L0 
+GAS LISTING /tmp/ccpyAonF.s 			page 22
+
+
+     /tmp/ccpyAonF.s:380    .text:0000000000000210 .L0 
+     /tmp/ccpyAonF.s:386    .text:0000000000000210 _ZN3MEM7memFreeEPv
+     /tmp/ccpyAonF.s:389    .text:0000000000000210 .L0 
+     /tmp/ccpyAonF.s:391    .text:0000000000000210 .L0 
+     /tmp/ccpyAonF.s:392    .text:0000000000000210 .L0 
+     /tmp/ccpyAonF.s:394    .text:0000000000000214 .L0 
+     /tmp/ccpyAonF.s:395    .text:0000000000000218 .L0 
+     /tmp/ccpyAonF.s:401    .text:000000000000022c .L0 
+     /tmp/ccpyAonF.s:402    .text:000000000000022c .L0 
+     /tmp/ccpyAonF.s:403    .text:000000000000022c .L0 
+     /tmp/ccpyAonF.s:404    .text:000000000000022c .L0 
+     /tmp/ccpyAonF.s:405    .text:000000000000022c .L0 
+     /tmp/ccpyAonF.s:407    .text:0000000000000230 .L0 
+     /tmp/ccpyAonF.s:410    .text:0000000000000234 .L0 
+     /tmp/ccpyAonF.s:411    .text:0000000000000234 .L0 
+     /tmp/ccpyAonF.s:414    .text:0000000000000238 .L0 
+     /tmp/ccpyAonF.s:415    .text:0000000000000238 .L0 
+     /tmp/ccpyAonF.s:418    .text:0000000000000240 .L0 
+     /tmp/ccpyAonF.s:419    .text:0000000000000240 .L0 
+     /tmp/ccpyAonF.s:422    .text:0000000000000244 .L0 
+     /tmp/ccpyAonF.s:423    .text:0000000000000244 .L0 
+     /tmp/ccpyAonF.s:427    .text:0000000000000248 .L0 
+     /tmp/ccpyAonF.s:428    .text:0000000000000248 .L0 
+     /tmp/ccpyAonF.s:430    .text:000000000000024c .L0 
+     /tmp/ccpyAonF.s:432    .text:0000000000000250 .L0 
+     /tmp/ccpyAonF.s:434    .text:0000000000000254 .L0 
+     /tmp/ccpyAonF.s:438    .text:000000000000025c .L0 
+     /tmp/ccpyAonF.s:442    .text:0000000000000260 .L0 
+     /tmp/ccpyAonF.s:445    .text:0000000000000264 .L0 
+     /tmp/ccpyAonF.s:446    .text:0000000000000264 .L0 
+     /tmp/ccpyAonF.s:447    .text:0000000000000264 .L0 
+     /tmp/ccpyAonF.s:450    .text:0000000000000268 .L0 
+     /tmp/ccpyAonF.s:452    .text:000000000000026c .L0 
+     /tmp/ccpyAonF.s:453    .text:000000000000026c .L0 
+     /tmp/ccpyAonF.s:455    .text:0000000000000270 .L0 
+     /tmp/ccpyAonF.s:458    .text:0000000000000274 .L0 
+     /tmp/ccpyAonF.s:459    .text:0000000000000274 .L0 
+     /tmp/ccpyAonF.s:461    .text:0000000000000278 .L0 
+     /tmp/ccpyAonF.s:463    .text:000000000000027c .L0 
+     /tmp/ccpyAonF.s:464    .text:000000000000027c .L0 
+     /tmp/ccpyAonF.s:466    .text:0000000000000280 .L0 
+     /tmp/ccpyAonF.s:469    .text:0000000000000284 .L0 
+     /tmp/ccpyAonF.s:470    .text:0000000000000284 .L0 
+     /tmp/ccpyAonF.s:474    .text:000000000000028c .L0 
+     /tmp/ccpyAonF.s:475    .text:000000000000028c .L0 
+     /tmp/ccpyAonF.s:477    .text:0000000000000290 .L0 
+     /tmp/ccpyAonF.s:480    .text:0000000000000294 .L0 
+     /tmp/ccpyAonF.s:482    .text:0000000000000298 .L0 
+     /tmp/ccpyAonF.s:486    .text:000000000000029c .L0 
+     /tmp/ccpyAonF.s:487    .text:000000000000029c .L0 
+     /tmp/ccpyAonF.s:489    .text:00000000000002a0 .L0 
+     /tmp/ccpyAonF.s:491    .text:00000000000002a4 .L0 
+     /tmp/ccpyAonF.s:495    .text:00000000000002a8 .L0 
+     /tmp/ccpyAonF.s:496    .text:00000000000002a8 .L0 
+     /tmp/ccpyAonF.s:497    .text:00000000000002a8 .L0 
+     /tmp/ccpyAonF.s:498    .text:00000000000002a8 .L0 
+     /tmp/ccpyAonF.s:501    .text:00000000000002ac .L0 
+GAS LISTING /tmp/ccpyAonF.s 			page 23
+
+
+     /tmp/ccpyAonF.s:503    .text:00000000000002b0 .L0 
+     /tmp/ccpyAonF.s:504    .text:00000000000002b0 .L0 
+     /tmp/ccpyAonF.s:506    .text:00000000000002b4 .L0 
+     /tmp/ccpyAonF.s:510    .text:00000000000002c0 .L0 
+     /tmp/ccpyAonF.s:513    .text:00000000000002c4 .L0 
+     /tmp/ccpyAonF.s:514    .text:00000000000002c4 .L0 
+     /tmp/ccpyAonF.s:516    .text:00000000000002c8 .L0 
+     /tmp/ccpyAonF.s:517    .text:00000000000002c8 .L0 
+     /tmp/ccpyAonF.s:519    .text:00000000000002cc .L0 
+     /tmp/ccpyAonF.s:521    .text:00000000000002d0 .L0 
+     /tmp/ccpyAonF.s:523    .text:00000000000002d4 .L0 
+     /tmp/ccpyAonF.s:524    .text:00000000000002d4 .L0 
+     /tmp/ccpyAonF.s:527    .text:00000000000002d8 .L0 
+     /tmp/ccpyAonF.s:528    .text:00000000000002d8 .L0 
+     /tmp/ccpyAonF.s:530    .text:00000000000002dc .L0 
+     /tmp/ccpyAonF.s:531    .text:00000000000002dc .L0 
+     /tmp/ccpyAonF.s:537    .text:00000000000002e0 .L0 
+     /tmp/ccpyAonF.s:538    .text:00000000000002e4 .L0 
+     /tmp/ccpyAonF.s:539    .text:00000000000002e4 .L0 
+     /tmp/ccpyAonF.s:541    .text:00000000000002e8 .L0 
+     /tmp/ccpyAonF.s:542    .text:00000000000002e8 .L0 
+     /tmp/ccpyAonF.s:544    .text:00000000000002ec .L0 
+     /tmp/ccpyAonF.s:547    .text:00000000000002f0 .L0 
+     /tmp/ccpyAonF.s:549    .text:00000000000002f4 .L0 
+     /tmp/ccpyAonF.s:552    .text:00000000000002f8 .L0 
+     /tmp/ccpyAonF.s:556    .text:00000000000002fc .L0 
+     /tmp/ccpyAonF.s:558    .text:00000000000002fc .L0 
+     /tmp/ccpyAonF.s:563    .text:0000000000000304 .L0 
+     /tmp/ccpyAonF.s:564    .text:0000000000000304 .L0 
+     /tmp/ccpyAonF.s:566    .text:0000000000000308 .L0 
+     /tmp/ccpyAonF.s:572    .text:0000000000000314 .L0 
+     /tmp/ccpyAonF.s:573    .text:0000000000000314 .L0 
+     /tmp/ccpyAonF.s:576    .text:0000000000000318 .L0 
+     /tmp/ccpyAonF.s:579    .text:0000000000000320 .L0 
+     /tmp/ccpyAonF.s:581    .text:0000000000000324 .L0 
+     /tmp/ccpyAonF.s:583    .text:0000000000000328 .L0 
+     /tmp/ccpyAonF.s:586    .text:000000000000032c .L0 
+     /tmp/ccpyAonF.s:587    .text:000000000000032c .L0 
+     /tmp/ccpyAonF.s:591    .text:0000000000000334 .L0 
+     /tmp/ccpyAonF.s:592    .text:0000000000000334 .L0 
+     /tmp/ccpyAonF.s:594    .text:0000000000000338 .L0 
+     /tmp/ccpyAonF.s:597    .text:0000000000000340 .L0 
+     /tmp/ccpyAonF.s:598    .text:0000000000000340 .L0 
+     /tmp/ccpyAonF.s:600    .text:0000000000000344 .L0 
+     /tmp/ccpyAonF.s:602    .text:0000000000000348 .L0 
+     /tmp/ccpyAonF.s:604    .text:000000000000034c .L0 
+     /tmp/ccpyAonF.s:605    .text:000000000000034c .L0 
+     /tmp/ccpyAonF.s:609    .text:0000000000000354 .L0 
+     /tmp/ccpyAonF.s:610    .text:0000000000000354 .L0 
+     /tmp/ccpyAonF.s:611    .text:0000000000000354 .L0 
+     /tmp/ccpyAonF.s:612    .text:0000000000000354 .L0 
+     /tmp/ccpyAonF.s:613    .text:0000000000000354 .L0 
+     /tmp/ccpyAonF.s:614    .text:0000000000000354 .L0 
+     /tmp/ccpyAonF.s:617    .text:0000000000000354 .L0 
+     /tmp/ccpyAonF.s:620    .text:0000000000000358 .L0 
+     /tmp/ccpyAonF.s:623    .text:000000000000035c .L0 
+     /tmp/ccpyAonF.s:624    .text:000000000000035c .L0 
+GAS LISTING /tmp/ccpyAonF.s 			page 24
+
+
+     /tmp/ccpyAonF.s:625    .text:000000000000035c .L0 
+     /tmp/ccpyAonF.s:626    .text:000000000000035c .L0 
+     /tmp/ccpyAonF.s:627    .text:000000000000035c .L0 
+     /tmp/ccpyAonF.s:628    .text:000000000000035c .L0 
+     /tmp/ccpyAonF.s:630    .text:000000000000035c .L0 
+     /tmp/ccpyAonF.s:637    .text:0000000000000364 .L0 
+     /tmp/ccpyAonF.s:641    .text:000000000000036c .L0 
+     /tmp/ccpyAonF.s:651    .bss:0000000000000000 _ZN3MEM8freeHeadE
+     /tmp/ccpyAonF.s:655    .bss:0000000000000008 _ZN3MEM8fullHeadE
+     /tmp/ccpyAonF.s:648    .bss:0000000000000000 .LANCHOR0
+     /tmp/ccpyAonF.s:661    .text:000000000000036c .L0 
+     /tmp/ccpyAonF.s:29     .text:0000000000000014 .L0 
+     /tmp/ccpyAonF.s:80     .text:0000000000000050 .L0 
+     /tmp/ccpyAonF.s:118    .text:0000000000000080 .L0 
+     /tmp/ccpyAonF.s:164    .text:00000000000000c8 .L0 
+     /tmp/ccpyAonF.s:228    .text:0000000000000118 .L0 
+     /tmp/ccpyAonF.s:234    .text:0000000000000128 .L0 
+     /tmp/ccpyAonF.s:263    .text:000000000000014c .L0 
+     /tmp/ccpyAonF.s:265    .text:0000000000000158 .L0 
+     /tmp/ccpyAonF.s:269    .text:0000000000000164 .L0 
+     /tmp/ccpyAonF.s:378    .text:0000000000000204 .L0 
+     /tmp/ccpyAonF.s:415    .text:0000000000000238 .L0 
+     /tmp/ccpyAonF.s:470    .text:0000000000000284 .L0 
+     /tmp/ccpyAonF.s:566    .text:0000000000000308 .L0 
+     /tmp/ccpyAonF.s:237    .text:0000000000000134 .L18
+     /tmp/ccpyAonF.s:212    .text:000000000000010c .L1
+     /tmp/ccpyAonF.s:99     .text:0000000000000074 .L22
+     /tmp/ccpyAonF.s:120    .text:000000000000008c .L5
+     /tmp/ccpyAonF.s:110    .text:000000000000007c .L6
+     /tmp/ccpyAonF.s:73     .text:0000000000000050 .L8
+     /tmp/ccpyAonF.s:167    .text:00000000000000d4 .L19
+     /tmp/ccpyAonF.s:174    .text:00000000000000dc .L20
+     /tmp/ccpyAonF.s:177    .text:00000000000000e0 .L11
+     /tmp/ccpyAonF.s:86     .text:0000000000000060 .L12
+     /tmp/ccpyAonF.s:31     .text:000000000000001c .L4
+     /tmp/ccpyAonF.s:62     .text:0000000000000040 .L7
+     /tmp/ccpyAonF.s:161    .text:00000000000000c8 .L9
+     /tmp/ccpyAonF.s:151    .text:00000000000000b8 .L10
+     /tmp/ccpyAonF.s:223    .text:0000000000000118 .L13
+     /tmp/ccpyAonF.s:201    .text:0000000000000100 .L15
+     /tmp/ccpyAonF.s:231    .text:0000000000000128 .L16
+     /tmp/ccpyAonF.s:192    .text:00000000000000f4 .L14
+     /tmp/ccpyAonF.s:207    .text:0000000000000108 .L17
+     /tmp/ccpyAonF.s:333    .text:00000000000001c8 .L32
+     /tmp/ccpyAonF.s:375    .text:0000000000000204 .L27
+     /tmp/ccpyAonF.s:368    .text:00000000000001fc .L29
+     /tmp/ccpyAonF.s:323    .text:00000000000001bc .L26
+     /tmp/ccpyAonF.s:359    .text:00000000000001f0 .L28
+     /tmp/ccpyAonF.s:608    .text:0000000000000354 .L46
+     /tmp/ccpyAonF.s:425    .text:0000000000000248 .L36
+     /tmp/ccpyAonF.s:436    .text:000000000000025c .L47
+     /tmp/ccpyAonF.s:555    .text:00000000000002fc .L48
+     /tmp/ccpyAonF.s:420    .text:0000000000000244 .L56
+     /tmp/ccpyAonF.s:439    .text:0000000000000260 .L35
+     /tmp/ccpyAonF.s:622    .text:000000000000035c .L50
+     /tmp/ccpyAonF.s:561    .text:0000000000000304 .L37
+     /tmp/ccpyAonF.s:467    .text:0000000000000284 .L39
+GAS LISTING /tmp/ccpyAonF.s 			page 25
+
+
+     /tmp/ccpyAonF.s:483    .text:000000000000029c .L40
+     /tmp/ccpyAonF.s:472    .text:000000000000028c .L41
+     /tmp/ccpyAonF.s:569    .text:0000000000000314 .L57
+     /tmp/ccpyAonF.s:511    .text:00000000000002c4 .L44
+     /tmp/ccpyAonF.s:633    .text:0000000000000364 .L51
+     /tmp/ccpyAonF.s:525    .text:00000000000002d8 .L45
+     /tmp/ccpyAonF.s:456    .text:0000000000000274 .L38
+     /tmp/ccpyAonF.s:584    .text:000000000000032c .L43
+     /tmp/ccpyAonF.s:589    .text:0000000000000334 .L58
+     /tmp/ccpyAonF.s:533    .text:00000000000002e0 .L34
+     /tmp/ccpyAonF.s:1204   .debug_abbrev:0000000000000000 .Ldebug_abbrev0
+     /tmp/ccpyAonF.s:2092   .debug_str:0000000000000174 .LASF50
+     /tmp/ccpyAonF.s:2110   .debug_str:0000000000000297 .LASF51
+     /tmp/ccpyAonF.s:2118   .debug_str:00000000000002d9 .LASF52
+     /tmp/ccpyAonF.s:5      .text:0000000000000000 .Ltext0
+     /tmp/ccpyAonF.s:658    .text:000000000000036c .Letext0
+     /tmp/ccpyAonF.s:2034   .debug_line:0000000000000000 .Ldebug_line0
+     /tmp/ccpyAonF.s:2102   .debug_str:000000000000026d .LASF0
+     /tmp/ccpyAonF.s:2084   .debug_str:000000000000013c .LASF1
+     /tmp/ccpyAonF.s:2076   .debug_str:00000000000000ea .LASF2
+     /tmp/ccpyAonF.s:2050   .debug_str:0000000000000052 .LASF4
+     /tmp/ccpyAonF.s:2080   .debug_str:0000000000000105 .LASF3
+     /tmp/ccpyAonF.s:2040   .debug_str:000000000000001b .LASF5
+     /tmp/ccpyAonF.s:2038   .debug_str:0000000000000008 .LASF6
+     /tmp/ccpyAonF.s:2070   .debug_str:00000000000000be .LASF7
+     /tmp/ccpyAonF.s:2112   .debug_str:00000000000002a3 .LASF8
+     /tmp/ccpyAonF.s:2048   .debug_str:0000000000000044 .LASF9
+     /tmp/ccpyAonF.s:2146   .debug_str:00000000000003a1 .LASF10
+     /tmp/ccpyAonF.s:2074   .debug_str:00000000000000db .LASF11
+     /tmp/ccpyAonF.s:2134   .debug_str:0000000000000359 .LASF12
+     /tmp/ccpyAonF.s:2116   .debug_str:00000000000002c9 .LASF13
+     /tmp/ccpyAonF.s:2086   .debug_str:000000000000014f .LASF14
+     /tmp/ccpyAonF.s:2062   .debug_str:000000000000007f .LASF15
+     /tmp/ccpyAonF.s:2114   .debug_str:00000000000002b3 .LASF16
+     /tmp/ccpyAonF.s:2056   .debug_str:0000000000000067 .LASF20
+     /tmp/ccpyAonF.s:2142   .debug_str:0000000000000397 .LASF17
+     /tmp/ccpyAonF.s:2144   .debug_str:000000000000039c .LASF18
+     /tmp/ccpyAonF.s:2042   .debug_str:0000000000000022 .LASF19
+     /tmp/ccpyAonF.s:2138   .debug_str:000000000000037a .LASF21
+     /tmp/ccpyAonF.s:2130   .debug_str:0000000000000341 .LASF22
+     /tmp/ccpyAonF.s:2094   .debug_str:0000000000000238 .LASF23
+     /tmp/ccpyAonF.s:2126   .debug_str:000000000000032a .LASF24
+     /tmp/ccpyAonF.s:2060   .debug_str:000000000000007a .LASF53
+     /tmp/ccpyAonF.s:2122   .debug_str:0000000000000313 .LASF54
+     /tmp/ccpyAonF.s:2128   .debug_str:0000000000000338 .LASF25
+     /tmp/ccpyAonF.s:2140   .debug_str:0000000000000384 .LASF27
+     /tmp/ccpyAonF.s:2124   .debug_str:0000000000000322 .LASF26
+     /tmp/ccpyAonF.s:2120   .debug_str:0000000000000300 .LASF28
+     /tmp/ccpyAonF.s:2132   .debug_str:000000000000034f .LASF29
+     /tmp/ccpyAonF.s:2082   .debug_str:0000000000000117 .LASF30
+     /tmp/ccpyAonF.s:2068   .debug_str:00000000000000b2 .LASF55
+     /tmp/ccpyAonF.s:2052   .debug_str:0000000000000059 .LASF31
+     /tmp/ccpyAonF.s:2098   .debug_str:0000000000000252 .LASF32
+     /tmp/ccpyAonF.s:2096   .debug_str:0000000000000247 .LASF33
+     /tmp/ccpyAonF.s:2088   .debug_str:000000000000015b .LASF34
+     /tmp/ccpyAonF.s:2044   .debug_str:0000000000000027 .LASF35
+     /tmp/ccpyAonF.s:2100   .debug_str:000000000000025b .LASF36
+GAS LISTING /tmp/ccpyAonF.s 			page 26
+
+
+     /tmp/ccpyAonF.s:303    .text:00000000000001a0 .LFB6
+     /tmp/ccpyAonF.s:381    .text:0000000000000210 .LFE6
+     /tmp/ccpyAonF.s:2078   .debug_str:00000000000000f8 .LASF37
+     /tmp/ccpyAonF.s:1739   .debug_loc:0000000000000000 .LLST6
+     /tmp/ccpyAonF.s:2066   .debug_str:00000000000000a4 .LASF38
+     /tmp/ccpyAonF.s:387    .text:0000000000000210 .LFB5
+     /tmp/ccpyAonF.s:642    .text:000000000000036c .LFE5
+     /tmp/ccpyAonF.s:2106   .debug_str:0000000000000285 .LASF39
+     /tmp/ccpyAonF.s:1768   .debug_loc:0000000000000075 .LLST7
+     /tmp/ccpyAonF.s:2108   .debug_str:000000000000028d .LASF40
+     /tmp/ccpyAonF.s:1813   .debug_loc:0000000000000127 .LLST8
+     /tmp/ccpyAonF.s:2064   .debug_str:0000000000000095 .LASF41
+     /tmp/ccpyAonF.s:1828   .debug_loc:0000000000000170 .LLST9
+     /tmp/ccpyAonF.s:2136   .debug_str:0000000000000369 .LASF42
+     /tmp/ccpyAonF.s:1851   .debug_loc:00000000000001df .LLST10
+     /tmp/ccpyAonF.s:2072   .debug_str:00000000000000d1 .LASF43
+     /tmp/ccpyAonF.s:1872   .debug_loc:000000000000023d .LLST11
+     /tmp/ccpyAonF.s:2016   .debug_ranges:0000000000000000 .Ldebug_ranges0
+     /tmp/ccpyAonF.s:2090   .debug_str:0000000000000168 .LASF44
+     /tmp/ccpyAonF.s:1891   .debug_loc:0000000000000299 .LLST12
+     /tmp/ccpyAonF.s:2104   .debug_str:000000000000027a .LASF45
+     /tmp/ccpyAonF.s:1898   .debug_loc:00000000000002bc .LLST13
+     /tmp/ccpyAonF.s:508    .text:00000000000002c0 .LVL32
+     /tmp/ccpyAonF.s:2054   .debug_str:0000000000000062 .LASF46
+     /tmp/ccpyAonF.s:10     .text:0000000000000000 .LFB4
+     /tmp/ccpyAonF.s:244    .text:000000000000013c .LFE4
+     /tmp/ccpyAonF.s:1909   .debug_loc:00000000000002f2 .LLST0
+     /tmp/ccpyAonF.s:2046   .debug_str:0000000000000039 .LASF47
+     /tmp/ccpyAonF.s:1934   .debug_loc:0000000000000354 .LLST1
+     /tmp/ccpyAonF.s:1945   .debug_loc:000000000000038a .LLST2
+     /tmp/ccpyAonF.s:1956   .debug_loc:00000000000003c0 .LLST3
+     /tmp/ccpyAonF.s:2036   .debug_str:0000000000000000 .LASF48
+     /tmp/ccpyAonF.s:1985   .debug_loc:0000000000000444 .LLST4
+     /tmp/ccpyAonF.s:121    .text:000000000000008c .LBB5
+     /tmp/ccpyAonF.s:168    .text:00000000000000d4 .LBE5
+     /tmp/ccpyAonF.s:2058   .debug_str:0000000000000071 .LASF49
+     /tmp/ccpyAonF.s:1996   .debug_loc:000000000000047a .LLST5
+     /tmp/ccpyAonF.s:250    .text:000000000000013c .LFB3
+     /tmp/ccpyAonF.s:297    .text:00000000000001a0 .LFE3
+     /tmp/ccpyAonF.s:286    .text:0000000000000190 .LVL15
+     /tmp/ccpyAonF.s:306    .text:00000000000001a0 .LVL16
+     /tmp/ccpyAonF.s:322    .text:00000000000001bc .LVL17
+     /tmp/ccpyAonF.s:332    .text:00000000000001c8 .LVL18
+     /tmp/ccpyAonF.s:372    .text:0000000000000200 .LVL19
+     /tmp/ccpyAonF.s:374    .text:0000000000000204 .LVL20
+     /tmp/ccpyAonF.s:390    .text:0000000000000210 .LVL21
+     /tmp/ccpyAonF.s:412    .text:0000000000000238 .LVL22
+     /tmp/ccpyAonF.s:545    .text:00000000000002ec .LVL34
+     /tmp/ccpyAonF.s:550    .text:00000000000002f4 .LVL35
+     /tmp/ccpyAonF.s:554    .text:00000000000002fc .LVL36
+     /tmp/ccpyAonF.s:607    .text:0000000000000354 .LVL40
+     /tmp/ccpyAonF.s:618    .text:0000000000000358 .LVL41
+     /tmp/ccpyAonF.s:621    .text:000000000000035c .LVL42
+     /tmp/ccpyAonF.s:416    .text:0000000000000240 .LVL23
+     /tmp/ccpyAonF.s:499    .text:00000000000002ac .LVL31
+     /tmp/ccpyAonF.s:574    .text:0000000000000318 .LVL39
+     /tmp/ccpyAonF.s:632    .text:0000000000000364 .LVL43
+GAS LISTING /tmp/ccpyAonF.s 			page 27
+
+
+     /tmp/ccpyAonF.s:444    .text:0000000000000264 .LVL26
+     /tmp/ccpyAonF.s:560    .text:0000000000000304 .LVL37
+     /tmp/ccpyAonF.s:440    .text:0000000000000260 .LVL25
+     /tmp/ccpyAonF.s:448    .text:0000000000000268 .LVL27
+     /tmp/ccpyAonF.s:471    .text:000000000000028c .LVL28
+     /tmp/ccpyAonF.s:478    .text:0000000000000294 .LVL29
+     /tmp/ccpyAonF.s:532    .text:00000000000002e0 .LVL33
+     /tmp/ccpyAonF.s:568    .text:0000000000000314 .LVL38
+     /tmp/ccpyAonF.s:494    .text:00000000000002a8 .LVL30
+     /tmp/ccpyAonF.s:14     .text:0000000000000000 .LVL0
+     /tmp/ccpyAonF.s:30     .text:000000000000001c .LVL2
+     /tmp/ccpyAonF.s:236    .text:0000000000000134 .LVL13
+     /tmp/ccpyAonF.s:241    .text:0000000000000138 .LVL14
+     /tmp/ccpyAonF.s:26     .text:0000000000000014 .LVL1
+     /tmp/ccpyAonF.s:211    .text:000000000000010c .LVL11
+     /tmp/ccpyAonF.s:222    .text:0000000000000118 .LVL12
+     /tmp/ccpyAonF.s:77     .text:0000000000000050 .LVL3
+     /tmp/ccpyAonF.s:85     .text:0000000000000060 .LVL4
+     /tmp/ccpyAonF.s:92     .text:0000000000000068 .LVL5
+     /tmp/ccpyAonF.s:98     .text:0000000000000074 .LVL6
+     /tmp/ccpyAonF.s:166    .text:00000000000000d4 .LVL9
+     /tmp/ccpyAonF.s:176    .text:00000000000000e0 .LVL10
+     /tmp/ccpyAonF.s:125    .text:0000000000000090 .LVL8
+     /tmp/ccpyAonF.s:662    .debug_info:0000000000000000 .Ldebug_info0
+     /tmp/ccpyAonF.s:35     .text:0000000000000020 .LBB2
+     /tmp/ccpyAonF.s:43     .text:0000000000000028 .LBE2
+     /tmp/ccpyAonF.s:45     .text:0000000000000028 .LBB10
+     /tmp/ccpyAonF.s:107    .text:0000000000000078 .LBE10
+     /tmp/ccpyAonF.s:111    .text:000000000000007c .LBB11
+     /tmp/ccpyAonF.s:213    .text:000000000000010c .LBE11
+     /tmp/ccpyAonF.s:225    .text:0000000000000118 .LBB12
+     /tmp/ccpyAonF.s:238    .text:0000000000000134 .LBE12
+     /tmp/ccpyAonF.s:492    .text:00000000000002a8 .LBB14
+     /tmp/ccpyAonF.s:534    .text:00000000000002e0 .LBE14
+     /tmp/ccpyAonF.s:635    .text:0000000000000364 .LBB15
+     /tmp/ccpyAonF.s:639    .text:000000000000036c .LBE15
+
+UNDEFINED SYMBOLS
+HEAP_START_ADDR
+HEAP_END_ADDR
